@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const sendgrid = require("nodemailer-sendgrid-transport");
 const User = require("../models/users");
+const authenticate = require("../authenticate");
 const userRouter = express.Router();
 
 const sendMail = (recipient, code) => {
@@ -129,4 +130,10 @@ userRouter.post("/verifyUser", (req, res) => {
     }
   );
 });
+userRouter.put("/addShippingAddress",authenticate,(req,res) => {
+  User.findByIdAndUpdate(req.session.user._id,{$push:{shippingAddress : req.body.shippingAddress}},{new:true})
+  .then(user=>{
+    res.status(200).json({status : 200 , message : "Succesfully added !"})
+  }).catch(err=>res.json({message:err.message}))
+})
 module.exports = userRouter;

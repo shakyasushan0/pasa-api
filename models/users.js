@@ -30,6 +30,7 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  shippingAddress : [{type:String}]
 });
 
 const Users = mongoose.model("User", userSchema);
