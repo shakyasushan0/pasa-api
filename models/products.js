@@ -37,6 +37,12 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
+  subSubCategory : {
+    type: String,
+  },
+  brand: {
+    type:String
+  },
   reviewedBy: [reviewSchema],
   postedBy: {
     type: ObjectId,
