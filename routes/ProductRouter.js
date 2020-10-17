@@ -31,6 +31,8 @@ router
       image,
       category,
       subCategory,
+      subSubCategory,
+      brand
     } = req.body;
     new Products({
       name,
@@ -40,6 +42,8 @@ router
       image,
       category,
       subCategory,
+      subSubCategory,
+      brand,
       postedBy: req.session.user,
     })
       .save()
