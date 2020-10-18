@@ -30,7 +30,24 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  shippingAddress : [{type:String}]
+  shippingAddress : [{region:{
+                        type: String,
+                        required: true,
+                      },
+                      city:{
+                          type:String,
+                          required:true,
+                      },
+                      area:{
+                        type: String,
+                        required: true,
+                      },
+                      address:{
+                        type:String,
+                        required: true,
+                      }
+                      
+                    }],
 });
 
 const Users = mongoose.model("User", userSchema);
