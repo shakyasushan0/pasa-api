@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const reviewSchema = new Schema({
-  id: {
+  reviewedBy: {
     type: ObjectId,
     ref: "User",
   },
@@ -43,7 +43,7 @@ const productSchema = new Schema({
   brand: {
     type:String
   },
-  reviewedBy: [reviewSchema],
+  review: [reviewSchema],
   postedBy: {
     type: ObjectId,
     ref: "Seller",

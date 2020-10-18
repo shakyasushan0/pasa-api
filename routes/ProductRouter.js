@@ -32,7 +32,7 @@ router
       category,
       subCategory,
       subSubCategory,
-      brand
+      brand,
     } = req.body;
     new Products({
       name,
@@ -60,5 +60,27 @@ router.route("/:productId").delete(authenticate, (req, res) => {
   Products.findByIdAndRemove(req.params.productId)
     .then((result) => res.json({ message: "succesfully deleted" }))
     .catch((err) => console.log(err));
+});
+router.route("/:productId/addReview").put(authenticate,(req, res) => {
+  const review = {
+    reviewedBy : req.session.user,
+    review: req.body.review,
+    rating: req.body.rating
+  }
+  //console.log(review);
+  
+  Products.findByIdAndUpdate(req.params.productId,{$push:{review:{
+    reviewedBy:req.session.user,
+    review:req.body.review,
+    rating:req.body.rating
+  }}},
+   {new:true}
+  )
+    .then((result) => {
+      res
+        .status(200)
+        .json({ status: 200, message: "Review added successfully!" });
+    })
+    .catch((err) => res.json(err.message));
 });
 module.exports = router;
