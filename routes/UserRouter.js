@@ -131,7 +131,14 @@ userRouter.post("/verifyUser", (req, res) => {
   );
 });
 userRouter.put("/addShippingAddress",authenticate,(req,res) => {
-  User.findByIdAndUpdate(req.session.user._id,{$push:{region : req.body.shippingAddress.region, city:req.body.shippingAddress.city, area:req.body.shippingAddress.area, address:req.body.shippingAddress.addresss}},{new:true})
+  const {region,city,area,address} = req.body;
+  const shippingAddress = {
+    region,
+    city,
+    area,
+    address
+  }
+  User.findByIdAndUpdate(req.session.user._id,{$push:{shippingAddress : shippingAddress}},{new:true})
   .then(user=>{
     res.status(200).json({status : 200 , message : "Succesfully added !"})
   }).catch(err=>res.json({message:err.message}))
