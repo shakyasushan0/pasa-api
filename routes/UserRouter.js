@@ -130,17 +130,39 @@ userRouter.post("/verifyUser", (req, res) => {
     }
   );
 });
-userRouter.put("/addShippingAddress",authenticate,(req,res) => {
-  const {region,city,area,address} = req.body;
+userRouter.put("/addShippingAddress", authenticate, (req, res) => {
+  const { region, city, area, address } = req.body;
   const shippingAddress = {
     region,
     city,
     area,
-    address
-  }
-  User.findByIdAndUpdate(req.session.user._id,{$push:{shippingAddress : shippingAddress}},{new:true})
-  .then(user=>{
-    res.status(200).json({status : 200 , message : "Succesfully added !"})
-  }).catch(err=>res.json({message:err.message}))
-})
+    address,
+  };
+  User.findByIdAndUpdate(
+    req.session.user._id,
+    { $push: { shippingAddress: shippingAddress } },
+    { new: true }
+  )
+    .then((user) => {
+      res.status(200).json({ status: 200, message: "Succesfully added !" });
+    })
+    .catch((err) => res.json({ message: err.message }));
+});
+userRouter.put("/deleteAddress/:addressId", authenticate, (req, res) => {
+  User.findByIdAndUpdate(
+    req.session.user._id,
+    {
+      $pull: {
+        shippingAddress: { _id: req.params.addressId },
+      },
+    },
+    { new: true }
+  )
+    .then((result) => {
+      res.status(200).json({
+        message: "Succesfully removed",
+      });
+    })
+    .catch((err) => console.log(err));
+});
 module.exports = userRouter;
