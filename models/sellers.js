@@ -32,6 +32,8 @@ const sellerSchema = new Schema({
     type: String,
     required: true,
   },
+  token: String,
+  expiresIn: Date,
 });
 const Sellers = mongoose.model("Seller", sellerSchema);
 module.exports = Sellers;

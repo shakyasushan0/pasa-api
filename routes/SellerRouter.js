@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 const sendgrid = require("nodemailer-sendgrid-transport");
 const Seller = require("../models/sellers");
 const sellerRouter = express.Router();
@@ -138,5 +139,42 @@ sellerRouter.post("/verifyUser", (req, res) => {
     req.session.user = user;
     res.status(200).json({ status: 200, message: "Success !" });
   });
+});
+sellerRouter.put("/requestResetPassword", (req, res) => {
+  Seller.findOne({ email: req.body.email })
+    .then((user) => {
+      if (user) {
+        const token = crypto.randomBytes(32).toString("hex");
+        const expiresIn = Date.now() + 3600000;
+        user.token = token;
+        user.expiresIn = expiresIn;
+        user
+          .save()
+          .then((usr) => console.log(usr))
+          .catch((err) => console.log(err));
+        var options = {
+          auth: {
+            api_key: process.env.SENDGRID_API,
+          },
+        };
+        var mailer = nodemailer.createTransport(sendgrid(options));
+        var email = {
+          to: req.body.email,
+          from: "no-reply@getnada.com",
+          subject: "Reset Password",
+          html: `
+        <h4>You requested to reset the password</h4>
+        <p>Please click on this <a href="http://localhost:3001/seller-reset-password/${token}/${expiresIn}">link</a> to reset your password</p>
+        `,
+        };
+        mailer.sendMail(email);
+        res.status(200).json({
+          message: "Reset Password link has been sent to " + user.email,
+        });
+      } else {
+        res.status(422).json({ message: "Email is not registered" });
+      }
+    })
+    .catch((err) => console.log(err));
 });
 module.exports = sellerRouter;

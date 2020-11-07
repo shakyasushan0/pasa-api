@@ -1,5 +1,6 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const sendgrid = require("nodemailer-sendgrid-transport");
 const User = require("../models/users");
@@ -165,4 +166,53 @@ userRouter.put("/deleteAddress/:addressId", authenticate, (req, res) => {
     })
     .catch((err) => console.log(err));
 });
+
+userRouter.put("/requestResetPassword", (req, res) => {
+  User.findOne({ email: req.body.email })
+    .then((user) => {
+      if (user) {
+        const token = crypto.randomBytes(32).toString("hex");
+        const expiresIn = Date.now() + 3600000;
+        user.token = token;
+        user.expiresIn = expiresIn;
+        user
+          .save()
+          .then((usr) => console.log(usr))
+          .catch((err) => console.log(err));
+        var options = {
+          auth: {
+            api_key: process.env.SENDGRID_API,
+          },
+        };
+        var mailer = nodemailer.createTransport(sendgrid(options));
+        var email = {
+          to: req.body.email,
+          from: "no-reply@getnada.com",
+          subject: "Reset Password",
+          html: `
+        <h4>You requested to reset the password</h4>
+        <p>Please click on this <a href="http://localhost:3001/reset-password/${token}/${expiresIn}">link</a> to reset your password</p>
+        `,
+        };
+        mailer.sendMail(email);
+        res.status(200).json({
+          message: "Reset Password link has been sent to " + user.email,
+        });
+      } else {
+        res.status(422).json({ message: "Email is not registered" });
+      }
+    })
+    .catch((err) => console.log(err));
+});
+userRouter.get("/userAddress/:uid", authenticate, (req, res) => {
+  User.findById(req.params.uid)
+    .then((user) => {
+      if (user) {
+        const userAddress = user.shippingAddress;
+        res.status(200).json(userAddress);
+      } else res.status(404).json({ message: "User not found" });
+    })
+    .catch((err) => console.log(err));
+});
+
 module.exports = userRouter;
